@@ -7,7 +7,6 @@ const offset = (page - 1) * limit;
 
 const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}&offset=${offset}`);
 const data = await response.json();
-
 const totalPages = Math.ceil(data.count / limit);
 
 const pokemon = await Promise.all(
@@ -23,27 +22,29 @@ const pokemon = await Promise.all(
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <title>Pokédex</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font-family: system-ui, sans-serif; background: #1a1a2e; color: white; min-height: 100vh; }
-      nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
-      nav a { color: white; text-decoration: none; margin-left: 2rem; opacity: 0.7; }
+      body { font-family: 'Nunito', sans-serif; background: #ffffff; color: #1a1a1a; min-height: 100vh; }
+      nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; border-bottom: 1px solid rgba(0,0,0,0.08); }
+      nav a { color: #1a1a1a; text-decoration: none; margin-left: 2rem; opacity: 0.6; font-weight: 600; }
       nav a:hover { opacity: 1; }
-      .logo { font-weight: 700; font-size: 1.25rem; color: #e63946; }
+      .logo { font-weight: 800; font-size: 1.25rem; color: #f97316; }
       main { padding: 3rem 2rem; max-width: 1200px; margin: 0 auto; }
       .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-      h1 { font-size: 2rem; }
+      h1 { font-size: 2rem; font-weight: 800; }
+      .page-info { opacity: 0.4; font-size: 0.9rem; }
       .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
-      .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 1.5rem 1rem; text-align: center; text-decoration: none; color: white; transition: background 0.2s, transform 0.2s; }
-      .card:hover { background: rgba(255,255,255,0.1); transform: translateY(-4px); }
+      .card { background: #fff7ed; border: 1px solid rgba(0,0,0,0.06); border-radius: 16px; padding: 1.5rem 1rem; text-align: center; text-decoration: none; color: #1a1a1a; transition: box-shadow 0.2s, transform 0.2s; }
+      .card:hover { box-shadow: 0 8px 24px rgba(249,115,22,0.15); transform: translateY(-4px); }
       .card img { width: 96px; height: 96px; }
-      .card .number { font-size: 0.75rem; opacity: 0.4; margin-bottom: 0.25rem; }
-      .card .name { font-weight: 600; text-transform: capitalize; }
+      .card .number { font-size: 0.75rem; opacity: 0.4; margin-bottom: 0.25rem; font-weight: 600; }
+      .card .name { font-weight: 700; text-transform: capitalize; }
       .pagination { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 3rem; }
-      .btn { background: rgba(255,255,255,0.1); color: white; padding: 0.6rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: background 0.2s; }
-      .btn:hover { background: #e63946; }
+      .btn { background: #f97316; color: white; padding: 0.6rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 700; transition: background 0.2s; }
+      .btn:hover { background: #ea6c00; }
       .btn.disabled { opacity: 0.3; pointer-events: none; }
-      .page-count { opacity: 0.5; font-size: 0.9rem; }
+      .page-count { opacity: 0.4; font-size: 0.9rem; }
     </style>
   </head>
   <body>
@@ -52,12 +53,13 @@ const pokemon = await Promise.all(
       <div>
         <a href="/">Home</a>
         <a href="/pokedex">Pokédex</a>
+        <a href="/about">About</a>
       </div>
     </nav>
     <main>
       <div class="header">
         <h1>Pokédex</h1>
-        <span>Page {page} of {totalPages}</span>
+        <span class="page-info">Page {page} of {totalPages}</span>
       </div>
       <div class="grid">
         {pokemon.map((p) => (

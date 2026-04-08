@@ -7,24 +7,25 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <title>About — Pokédex</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font-family: system-ui, sans-serif; background: #1a1a2e; color: white; min-height: 100vh; }
-      nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
-      nav a { color: white; text-decoration: none; margin-left: 2rem; opacity: 0.7; }
+      body { font-family: 'Nunito', sans-serif; background: #ffffff; color: #1a1a1a; min-height: 100vh; }
+      nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; border-bottom: 1px solid rgba(0,0,0,0.08); }
+      nav a { color: #1a1a1a; text-decoration: none; margin-left: 2rem; opacity: 0.6; font-weight: 600; }
       nav a:hover { opacity: 1; }
-      .logo { font-weight: 700; font-size: 1.25rem; color: #e63946; }
+      .logo { font-weight: 800; font-size: 1.25rem; color: #f97316; }
       main { max-width: 800px; margin: 4rem auto; padding: 0 2rem; }
       h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; }
-      h1 span { color: #e63946; }
-      .lead { font-size: 1.15rem; opacity: 0.6; margin-bottom: 3rem; line-height: 1.7; }
+      h1 span { color: #f97316; }
+      .lead { font-size: 1.15rem; opacity: 0.5; margin-bottom: 3rem; line-height: 1.7; }
       .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
-      .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.5rem; }
-      .card h2 { font-size: 1rem; margin-bottom: 0.5rem; color: #e63946; }
+      .card { background: #fff7ed; border: 1px solid rgba(0,0,0,0.06); border-radius: 16px; padding: 1.5rem; }
+      .card h2 { font-size: 1rem; margin-bottom: 0.5rem; color: #f97316; font-weight: 800; }
       .card p { font-size: 0.9rem; opacity: 0.6; line-height: 1.6; }
       .cta { text-align: center; margin-top: 2rem; }
-      .btn { background: #e63946; color: white; padding: 0.875rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600; }
-      .btn:hover { background: #c1121f; }
+      .btn { background: #f97316; color: white; padding: 0.875rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 700; }
+      .btn:hover { background: #ea6c00; }
     </style>
   </head>
   <body>
@@ -38,11 +39,7 @@
     </nav>
     <main>
       <h1>The <span>Pokémon</span> World</h1>
-      <p class="lead">
-        Pokémon are creatures of all shapes and sizes who live in the wild or alongside humans.
-        There are currently over 1000 known species, each with unique abilities, types, and stats.
-      </p>
-
+      <p class="lead">Pokémon are creatures of all shapes and sizes who live in the wild or alongside humans. There are currently over 1000 known species, each with unique abilities, types, and stats.</p>
       <div class="grid">
         <div class="card">
           <h2>18 Types</h2>
@@ -61,7 +58,6 @@
           <p>This Pokédex is powered by PokéAPI — a free, open RESTful API serving over 2.5 billion calls per month with data on every Pokémon.</p>
         </div>
       </div>
-
       <div class="cta">
         <a href="/pokedex" class="btn">Explore the Pokédex</a>
       </div>
