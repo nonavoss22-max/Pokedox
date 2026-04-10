@@ -45,6 +45,12 @@ const pokemon = await Promise.all(
       .btn:hover { background: #ea6c00; }
       .btn.disabled { opacity: 0.3; pointer-events: none; }
       .page-count { opacity: 0.4; font-size: 0.9rem; }
+      .search-bar { display: flex; gap: 0.75rem; margin-bottom: 2rem; flex-wrap: wrap; align-items: center; }
+      .search-input { flex: 1; min-width: 200px; padding: 0.65rem 1rem; border: 1.5px solid rgba(0,0,0,0.12); border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 1rem; outline: none; }
+      .search-input:focus { border-color: #f97316; }
+      .type-select { padding: 0.65rem 1rem; border: 1.5px solid rgba(0,0,0,0.12); border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 1rem; background: white; cursor: pointer; outline: none; }
+      .type-select:focus { border-color: #f97316; }
+      .search-count { opacity: 0.4; font-size: 0.9rem; white-space: nowrap; }
     </style>
   </head>
   <body>
@@ -61,6 +67,32 @@ const pokemon = await Promise.all(
         <h1>Pokédex</h1>
         <span class="page-info">Page {page} of {totalPages}</span>
       </div>
+      <div class="search-bar">
+        <input type="text" id="search-input" class="search-input" placeholder="Search Pokémon..." autocomplete="off" />
+        <select id="type-filter" class="type-select">
+          <option value="">All Types</option>
+          <option value="normal">Normal</option>
+          <option value="fire">Fire</option>
+          <option value="water">Water</option>
+          <option value="electric">Electric</option>
+          <option value="grass">Grass</option>
+          <option value="ice">Ice</option>
+          <option value="fighting">Fighting</option>
+          <option value="poison">Poison</option>
+          <option value="ground">Ground</option>
+          <option value="flying">Flying</option>
+          <option value="psychic">Psychic</option>
+          <option value="bug">Bug</option>
+          <option value="rock">Rock</option>
+          <option value="ghost">Ghost</option>
+          <option value="dragon">Dragon</option>
+          <option value="dark">Dark</option>
+          <option value="steel">Steel</option>
+          <option value="fairy">Fairy</option>
+        </select>
+        <span id="search-count" class="search-count"></span>
+      </div>
+      <div id="search-results" class="grid" style="display:none"></div>
       <div class="grid">
         {pokemon.map((p) => (
           <a href={`/pokemon/${p.name}`} class="card">
@@ -76,5 +108,75 @@ const pokemon = await Promise.all(
         <a href={`/pokedex?page=${page + 1}`} class={`btn ${page >= totalPages ? 'disabled' : ''}`}>Next →</a>
       </div>
     </main>
+    <script>
+      (function () {
+        const searchInput = document.getElementById('search-input');
+        const typeFilter = document.getElementById('type-filter');
+        const searchResults = document.getElementById('search-results');
+        const searchCount = document.getElementById('search-count');
+        const mainGrid = document.querySelector('.grid:not(#search-results)');
+        const pagination = document.querySelector('.pagination');
+        const pageInfo = document.querySelector('.page-info');
+
+        let allPokemon = [];
+        const typeCache = {};
+
+        fetch('https://pokeapi.co/api/v2/pokemon?limit=1302')
+          .then(r => r.json())
+          .then(data => {
+            allPokemon = data.results.map(p => ({
+              name: p.name,
+              id: parseInt(p.url.split('/').filter(Boolean).pop())
+            }));
+          });
+
+        async function getTypeSet(typeName) {
+          if (typeCache[typeName]) return typeCache[typeName];
+          const res = await fetch(`https://pokeapi.co/api/v2/type/${typeName}`);
+          const data = await res.json();
+          typeCache[typeName] = new Set(data.pokemon.map(p => p.pokemon.name));
+          return typeCache[typeName];
+        }
+
+        async function update() {
+          const query = searchInput.value.trim().toLowerCase();
+          const type = typeFilter.value;
+
+          if (!query && !type) {
+            searchResults.style.display = 'none';
+            mainGrid.style.display = 'grid';
+            pagination.style.display = 'flex';
+            pageInfo.style.display = '';
+            searchCount.textContent = '';
+            return;
+          }
+
+          mainGrid.style.display = 'none';
+          pagination.style.display = 'none';
+          pageInfo.style.display = 'none';
+
+          let filtered = allPokemon;
+          if (query) filtered = filtered.filter(p => p.name.includes(query));
+          if (type) {
+            const typeSet = await getTypeSet(type);
+            filtered = filtered.filter(p => typeSet.has(p.name));
+          }
+
+          const display = filtered.slice(0, 20);
+          searchCount.textContent = filtered.length + ' result' + (filtered.length !== 1 ? 's' : '');
+          searchResults.style.display = display.length ? 'grid' : 'none';
+          searchResults.innerHTML = display.map(p =>
+            `<a href="/pokemon/${p.name}" class="card">` +
+            `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png" ` +
+            `alt="${p.name}" loading="lazy" width="96" height="96" />` +
+            `<div class="number">#${String(p.id).padStart(3, '0')}</div>` +
+            `<div class="name">${p.name}</div></a>`
+          ).join('');
+        }
+
+        searchInput.addEventListener('input', update);
+        typeFilter.addEventListener('change', update);
+      })();
+    </script>
   </body>
 </html>
