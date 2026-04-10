@@ -10,17 +10,103 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font-family: 'Nunito', sans-serif; background: #ffffff; color: #1a1a1a; min-height: 100vh; }
-      nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; border-bottom: 1px solid rgba(0,0,0,0.08); }
-      nav a { color: #1a1a1a; text-decoration: none; margin-left: 2rem; opacity: 0.6; transition: opacity 0.2s; font-weight: 600; }
-      nav a:hover { opacity: 1; }
-      .logo { font-weight: 800; font-size: 1.25rem; color: #f97316; }
-      hero { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 6rem 2rem; gap: 1.5rem; }
-      h1 { font-size: 4rem; font-weight: 800; line-height: 1.1; }
-      h1 span { color: #f97316; }
-      p { font-size: 1.25rem; opacity: 0.5; max-width: 480px; }
-      .btn { background: #f97316; color: white; padding: 0.875rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 700; margin-top: 1rem; transition: background 0.2s; }
-      .btn:hover { background: #ea6c00; }
+      body { font-family: 'Nunito', sans-serif; background: #0a0a0f; color: #f0f0f5; min-height: 100vh; overflow-x: hidden; }
+
+      body::before, body::after {
+        content: ''; position: fixed; border-radius: 50%;
+        filter: blur(140px); pointer-events: none; z-index: 0;
+      }
+      body::before {
+        width: 700px; height: 700px;
+        background: radial-gradient(circle, rgba(249,115,22,0.13) 0%, transparent 70%);
+        top: -250px; right: -150px;
+      }
+      body::after {
+        width: 600px; height: 600px;
+        background: radial-gradient(circle, rgba(139,92,246,0.1) 0%, transparent 70%);
+        bottom: -200px; left: -150px;
+      }
+
+      nav {
+        position: relative; z-index: 10;
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 1.25rem 2rem;
+        background: rgba(10,10,15,0.8); backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+      nav a { color: rgba(255,255,255,0.5); text-decoration: none; margin-left: 2rem; transition: color 0.2s; font-weight: 600; font-size: 0.9rem; }
+      nav a:hover { color: #f97316; }
+      .logo { font-weight: 800; font-size: 1.25rem; color: #f97316; letter-spacing: -0.02em; }
+
+      hero {
+        position: relative; z-index: 1;
+        display: flex; flex-direction: column; align-items: center;
+        justify-content: center; text-align: center;
+        padding: 8rem 2rem 6rem; gap: 1.5rem;
+      }
+
+      .eyebrow {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        background: rgba(249,115,22,0.1); border: 1px solid rgba(249,115,22,0.2);
+        color: #f97316; border-radius: 999px; padding: 0.3rem 1rem;
+        font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      }
+
+      h1 {
+        font-size: clamp(3rem, 8vw, 5.5rem); font-weight: 800;
+        line-height: 1.0; letter-spacing: -0.04em;
+        background: linear-gradient(160deg, #fff 0%, rgba(255,255,255,0.5) 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      }
+      h1 em {
+        font-style: normal;
+        background: linear-gradient(135deg, #f97316 0%, #fb923c 60%, #fbbf24 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      }
+
+      p {
+        font-size: 1.2rem; color: rgba(255,255,255,0.4);
+        max-width: 460px; line-height: 1.65;
+      }
+
+      .cta-group { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-top: 0.5rem; }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #f97316 0%, #ea6c00 100%);
+        color: white; padding: 0.9rem 2.25rem; border-radius: 12px;
+        text-decoration: none; font-weight: 800; font-size: 1rem;
+        box-shadow: 0 4px 24px rgba(249,115,22,0.35);
+        transition: transform 0.15s, box-shadow 0.15s;
+        position: relative; overflow: hidden;
+      }
+      .btn-primary::after {
+        content: ''; position: absolute; inset: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+      }
+      .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(249,115,22,0.45); }
+
+      .btn-secondary {
+        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+        color: rgba(255,255,255,0.7); padding: 0.9rem 2.25rem; border-radius: 12px;
+        text-decoration: none; font-weight: 700; font-size: 1rem;
+        backdrop-filter: blur(10px); transition: all 0.15s;
+      }
+      .btn-secondary:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+      .features {
+        position: relative; z-index: 1;
+        display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem; max-width: 900px; margin: 0 auto; padding: 0 2rem 6rem;
+      }
+      .feat {
+        background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 16px; padding: 1.5rem;
+        backdrop-filter: blur(10px); transition: border-color 0.2s;
+      }
+      .feat:hover { border-color: rgba(249,115,22,0.25); }
+      .feat-icon { font-size: 1.75rem; margin-bottom: 0.75rem; }
+      .feat h3 { font-size: 1rem; font-weight: 800; margin-bottom: 0.4rem; color: #fff; }
+      .feat p { font-size: 0.85rem; color: rgba(255,255,255,0.4); line-height: 1.6; }
     </style>
   </head>
   <body>
@@ -29,13 +115,40 @@
       <div>
         <a href="/">Home</a>
         <a href="/pokedex">Pokédex</a>
+        <a href="/ai-generator">AI Generator</a>
         <a href="/about">About</a>
       </div>
     </nav>
     <hero>
-      <h1>Explore the<br /><span>Pokémon</span> World</h1>
-      <p>Browse the complete Pokédex, discover stats, abilities, and types for every Pokémon.</p>
-      <a href="/pokedex" class="btn">Open Pokédex</a>
+      <span class="eyebrow">✦ 1025+ Pokémon</span>
+      <h1>Explore the<br/><em>Pokémon</em> World</h1>
+      <p>Browse every Pokémon, discover stats, types, and abilities — or generate a brand-new one with AI.</p>
+      <div class="cta-group">
+        <a href="/pokedex" class="btn-primary">Open Pokédex</a>
+        <a href="/ai-generator" class="btn-secondary">✦ AI Generator</a>
+      </div>
     </hero>
+    <div class="features">
+      <div class="feat">
+        <div class="feat-icon">⚡</div>
+        <h3>1025+ Pokémon</h3>
+        <p>Every species across all 9 generations, with full stats, types, and sprites.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">🔍</div>
+        <h3>Search & Filter</h3>
+        <p>Find any Pokémon instantly by name or filter by all 18 types.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">✦</div>
+        <h3>AI Generator</h3>
+        <p>Describe a concept and Claude will design a completely original Pokémon.</p>
+      </div>
+      <div class="feat">
+        <div class="feat-icon">📊</div>
+        <h3>Base Stats</h3>
+        <p>View HP, Attack, Defense, Speed and more for every Pokémon.</p>
+      </div>
+    </div>
   </body>
 </html>

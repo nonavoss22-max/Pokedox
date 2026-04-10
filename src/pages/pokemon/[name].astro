@@ -7,6 +7,27 @@ const pokemon = await response.json();
 
 const types = pokemon.types.map((t: any) => t.type.name);
 const stats = pokemon.stats.map((s: any) => ({ name: s.stat.name, value: s.base_stat }));
+const total = stats.reduce((sum: number, s: any) => sum + s.value, 0);
+
+const TYPE_COLORS: Record<string, string> = {
+  normal: '#6d6d4e', fire: '#9c3100', water: '#1a48b8', grass: '#2d7a1e',
+  electric: '#a38400', ice: '#2e8080', fighting: '#7d1a14', poison: '#6a2080',
+  ground: '#8a6a00', flying: '#4a3a90', psychic: '#991050', bug: '#4a5a00',
+  rock: '#6a5800', ghost: '#3a2060', dragon: '#3800b0', dark: '#2a1a10',
+  steel: '#4a4a60', fairy: '#8a3050',
+};
+
+const TYPE_GLOW: Record<string, string> = {
+  normal: '160,160,78', fire: '240,128,48', water: '104,144,240',
+  grass: '120,200,80', electric: '248,208,48', ice: '152,216,216',
+  fighting: '192,48,40', poison: '160,64,160', ground: '224,192,104',
+  flying: '168,144,240', psychic: '248,88,136', bug: '168,184,32',
+  rock: '184,160,56', ghost: '112,88,152', dragon: '112,56,248',
+  dark: '112,88,72', steel: '184,184,208', fairy: '238,153,172',
+};
+
+const primaryType = types[0] ?? 'normal';
+const glowColor = TYPE_GLOW[primaryType] ?? '249,115,22';
 ---
 
 <html lang="en">
@@ -15,29 +36,103 @@ const stats = pokemon.stats.map((s: any) => ({ name: s.stat.name, value: s.base_
     <meta name="viewport" content="width=device-width" />
     <title>{pokemon.name} — Pokédex</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
-    <style>
+    <style define:vars={{ glowColor }}>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font-family: 'Nunito', sans-serif; background: #ffffff; color: #1a1a1a; min-height: 100vh; }
-      nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; border-bottom: 1px solid rgba(0,0,0,0.08); }
-      nav a { color: #1a1a1a; text-decoration: none; margin-left: 2rem; opacity: 0.6; font-weight: 600; }
-      nav a:hover { opacity: 1; }
-      .logo { font-weight: 800; font-size: 1.25rem; color: #f97316; }
-      main { max-width: 700px; margin: 3rem auto; padding: 0 2rem; }
-      .back { color: rgba(0,0,0,0.4); text-decoration: none; font-size: 0.9rem; display: inline-block; margin-bottom: 2rem; font-weight: 600; }
+      body { font-family: 'Nunito', sans-serif; background: #0a0a0f; color: #f0f0f5; min-height: 100vh; overflow-x: hidden; }
+
+      body::before {
+        content: ''; position: fixed; border-radius: 50%;
+        filter: blur(160px); pointer-events: none; z-index: 0;
+        width: 700px; height: 700px;
+        background: radial-gradient(circle, rgba(var(--glowColor), 0.18) 0%, transparent 70%);
+        top: -250px; right: -200px;
+      }
+
+      nav {
+        position: relative; z-index: 10;
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 1.25rem 2rem;
+        background: rgba(10,10,15,0.8); backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+      nav a { color: rgba(255,255,255,0.5); text-decoration: none; margin-left: 2rem; transition: color 0.2s; font-weight: 600; font-size: 0.9rem; }
+      nav a:hover { color: #f97316; }
+      .logo { font-weight: 800; font-size: 1.25rem; color: #f97316; letter-spacing: -0.02em; }
+
+      main { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; padding: 3rem 2rem; }
+
+      .back {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        color: rgba(255,255,255,0.35); text-decoration: none;
+        font-size: 0.875rem; font-weight: 700; margin-bottom: 2rem;
+        transition: color 0.2s;
+      }
       .back:hover { color: #f97316; }
-      .header { display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem; background: #fff7ed; border-radius: 20px; padding: 2rem; }
-      .header img { width: 160px; height: 160px; image-rendering: pixelated; }
-      .header h1 { font-size: 2.5rem; font-weight: 800; text-transform: capitalize; }
-      .number { opacity: 0.4; font-size: 1rem; margin-bottom: 0.5rem; font-weight: 700; }
-      .types { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
-      .type { padding: 0.25rem 0.75rem; border-radius: 100px; font-size: 0.8rem; font-weight: 700; background: #f97316; color: white; text-transform: capitalize; }
-      .section { margin-top: 2rem; }
-      .section h2 { font-size: 0.85rem; opacity: 0.4; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; font-weight: 800; }
-      .stat { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; }
-      .stat-name { width: 140px; font-size: 0.85rem; opacity: 0.5; text-transform: capitalize; font-weight: 600; }
-      .stat-bar { flex: 1; height: 8px; background: rgba(0,0,0,0.06); border-radius: 4px; overflow: hidden; }
-      .stat-fill { height: 100%; background: #f97316; border-radius: 4px; }
-      .stat-value { width: 32px; text-align: right; font-size: 0.85rem; font-weight: 700; }
+
+      .hero {
+        background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 24px; overflow: hidden; margin-bottom: 1rem;
+      }
+
+      .hero-top {
+        padding: 2.5rem 2rem 2rem;
+        background: linear-gradient(135deg, rgba(var(--glowColor), 0.15) 0%, rgba(var(--glowColor), 0.04) 100%);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
+        position: relative; overflow: hidden;
+      }
+      .hero-top::after {
+        content: ''; position: absolute; top: -60px; right: -60px;
+        width: 250px; height: 250px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(var(--glowColor), 0.2) 0%, transparent 70%);
+        pointer-events: none;
+      }
+
+      .pokemon-img {
+        width: 180px; height: 180px; image-rendering: pixelated;
+        filter: drop-shadow(0 8px 24px rgba(var(--glowColor), 0.5));
+        position: relative; z-index: 1; flex-shrink: 0;
+      }
+
+      .hero-info { position: relative; z-index: 1; }
+      .number { font-size: 0.8rem; color: rgba(255,255,255,0.3); font-weight: 700; letter-spacing: 0.06em; margin-bottom: 0.3rem; }
+      .poke-name { font-size: 2.75rem; font-weight: 800; text-transform: capitalize; letter-spacing: -0.03em; line-height: 1; margin-bottom: 1rem; }
+
+      .types { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+      .type-badge {
+        padding: 0.35rem 1rem; border-radius: 999px; font-size: 0.75rem;
+        font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 0.06em;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      }
+
+      .card {
+        background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px; padding: 1.75rem; margin-bottom: 1rem;
+      }
+
+      .section-label {
+        font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+        letter-spacing: 0.1em; color: rgba(255,255,255,0.25); margin-bottom: 1rem;
+      }
+
+      .stat { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.6rem; }
+      .stat:last-child { margin-bottom: 0; }
+      .stat-name { width: 120px; font-size: 0.78rem; color: rgba(255,255,255,0.35); text-transform: capitalize; font-weight: 700; flex-shrink: 0; }
+      .stat-bar { flex: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+      .stat-fill {
+        height: 100%; border-radius: 4px;
+        background: linear-gradient(90deg, rgba(var(--glowColor), 0.9) 0%, rgba(var(--glowColor), 1) 100%);
+        box-shadow: 0 0 8px rgba(var(--glowColor), 0.5);
+      }
+      .stat-value { width: 32px; text-align: right; font-size: 0.8rem; font-weight: 800; color: rgba(255,255,255,0.7); }
+
+      .stat-total {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-top: 0.75rem; padding-top: 0.75rem;
+        border-top: 1px solid rgba(255,255,255,0.06);
+        font-size: 0.78rem; color: rgba(255,255,255,0.3); font-weight: 700;
+      }
+      .stat-total strong { color: rgba(255,255,255,0.7); font-size: 0.9rem; }
     </style>
   </head>
   <body>
@@ -46,23 +141,34 @@ const stats = pokemon.stats.map((s: any) => ({ name: s.stat.name, value: s.base_
       <div>
         <a href="/">Home</a>
         <a href="/pokedex">Pokédex</a>
+        <a href="/ai-generator">AI Generator</a>
         <a href="/about">About</a>
       </div>
     </nav>
     <main>
       <a href="/pokedex" class="back">← Back to Pokédex</a>
-      <div class="header">
-        <img src={pokemon.sprites.other["official-artwork"].front_default || pokemon.sprites.front_default} alt={pokemon.name} />
-        <div>
-          <div class="number">#{String(pokemon.id).padStart(3, '0')}</div>
-          <h1>{pokemon.name}</h1>
-          <div class="types">
-            {types.map((t: string) => <span class="type">{t}</span>)}
+
+      <div class="hero">
+        <div class="hero-top">
+          <img
+            class="pokemon-img"
+            src={pokemon.sprites.other["official-artwork"].front_default || pokemon.sprites.front_default}
+            alt={pokemon.name}
+          />
+          <div class="hero-info">
+            <div class="number">#{String(pokemon.id).padStart(3, '0')}</div>
+            <div class="poke-name">{pokemon.name}</div>
+            <div class="types">
+              {types.map((t: string) => (
+                <span class="type-badge" style={`background: ${TYPE_COLORS[t] ?? '#555'}`}>{t}</span>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-      <div class="section">
-        <h2>Base Stats</h2>
+
+      <div class="card">
+        <p class="section-label">Base Stats</p>
         {stats.map((s: any) => (
           <div class="stat">
             <span class="stat-name">{s.name}</span>
@@ -72,6 +178,10 @@ const stats = pokemon.stats.map((s: any) => ({ name: s.stat.name, value: s.base_
             <span class="stat-value">{s.value}</span>
           </div>
         ))}
+        <div class="stat-total">
+          <span>Base Stat Total</span>
+          <strong>{total}</strong>
+        </div>
       </div>
     </main>
   </body>

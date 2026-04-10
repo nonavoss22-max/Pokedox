@@ -1,0 +1,437 @@
+---
+export const prerender = false;
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>AI Generator — Pokédex</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+        font-family: 'Nunito', sans-serif;
+        background: #0a0a0f;
+        color: #f0f0f5;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* Ambient background orbs */
+      body::before, body::after {
+        content: '';
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(120px);
+        pointer-events: none;
+        z-index: 0;
+      }
+      body::before {
+        width: 600px; height: 600px;
+        background: radial-gradient(circle, rgba(249,115,22,0.15) 0%, transparent 70%);
+        top: -200px; right: -100px;
+      }
+      body::after {
+        width: 500px; height: 500px;
+        background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+        bottom: -150px; left: -100px;
+      }
+
+      nav {
+        position: relative; z-index: 10;
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 1.25rem 2rem;
+        background: rgba(10,10,15,0.8);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+      nav a { color: rgba(255,255,255,0.5); text-decoration: none; margin-left: 2rem; transition: color 0.2s; font-weight: 600; font-size: 0.9rem; }
+      nav a:hover { color: #f97316; }
+      .logo { font-weight: 800; font-size: 1.25rem; color: #f97316; letter-spacing: -0.02em; }
+
+      main { position: relative; z-index: 1; max-width: 780px; margin: 0 auto; padding: 5rem 2rem 4rem; }
+
+      /* Hero */
+      .hero { text-align: center; margin-bottom: 3rem; }
+      .hero-tag {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        background: rgba(249,115,22,0.12); border: 1px solid rgba(249,115,22,0.25);
+        color: #f97316; border-radius: 999px; padding: 0.3rem 0.9rem;
+        font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+        margin-bottom: 1.25rem;
+      }
+      .hero h1 {
+        font-size: clamp(2.2rem, 5vw, 3.25rem); font-weight: 800;
+        line-height: 1.1; letter-spacing: -0.03em; margin-bottom: 1rem;
+        background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.6) 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      }
+      .hero h1 em {
+        font-style: normal;
+        background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      }
+      .hero p { color: rgba(255,255,255,0.4); font-size: 1.05rem; max-width: 440px; margin: 0 auto; line-height: 1.6; }
+
+      /* Form */
+      .form-box {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px; padding: 2rem;
+        backdrop-filter: blur(10px);
+        margin-bottom: 2rem;
+        transition: border-color 0.3s;
+      }
+      .form-box:focus-within { border-color: rgba(249,115,22,0.35); }
+
+      .form-box label { display: block; font-weight: 700; margin-bottom: 0.75rem; font-size: 0.9rem; color: rgba(255,255,255,0.7); letter-spacing: 0.02em; }
+      .form-box textarea {
+        width: 100%; padding: 1rem 1.1rem;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        font-family: 'Nunito', sans-serif; font-size: 1rem;
+        resize: vertical; min-height: 110px;
+        transition: border-color 0.2s, background 0.2s;
+        background: rgba(255,255,255,0.04); color: #f0f0f5;
+      }
+      .form-box textarea::placeholder { color: rgba(255,255,255,0.2); }
+      .form-box textarea:focus { outline: none; border-color: rgba(249,115,22,0.5); background: rgba(255,255,255,0.06); }
+
+      .examples { margin-top: 1rem; font-size: 0.8rem; color: rgba(255,255,255,0.25); line-height: 1.7; }
+      .examples strong { color: rgba(255,255,255,0.4); }
+      .example-chip {
+        display: inline-block; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 6px; padding: 0.15rem 0.5rem; margin: 0.1rem;
+        cursor: pointer; transition: all 0.15s; font-size: 0.78rem;
+      }
+      .example-chip:hover { background: rgba(249,115,22,0.12); border-color: rgba(249,115,22,0.3); color: #f97316; }
+
+      .btn {
+        width: 100%; margin-top: 1.25rem;
+        padding: 1rem; border: none; border-radius: 12px;
+        font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 800;
+        cursor: pointer; letter-spacing: 0.02em;
+        background: linear-gradient(135deg, #f97316 0%, #ea6c00 100%);
+        color: white;
+        box-shadow: 0 4px 24px rgba(249,115,22,0.35), 0 1px 0 rgba(255,255,255,0.1) inset;
+        transition: transform 0.15s, box-shadow 0.15s;
+        position: relative; overflow: hidden;
+      }
+      .btn::after {
+        content: '';
+        position: absolute; inset: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+        pointer-events: none;
+      }
+      .btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 8px 32px rgba(249,115,22,0.45), 0 1px 0 rgba(255,255,255,0.1) inset; }
+      .btn:active:not(:disabled) { transform: translateY(0); }
+      .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+      /* Loading */
+      #result { display: none; }
+      .loading-wrap { display: flex; flex-direction: column; align-items: center; gap: 1rem; padding: 3rem; }
+      .spinner {
+        width: 40px; height: 40px; border-radius: 50%;
+        border: 3px solid rgba(249,115,22,0.15);
+        border-top-color: #f97316;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .loading-wrap p { color: rgba(255,255,255,0.4); font-weight: 600; font-size: 0.9rem; }
+
+      /* Error */
+      .error-box {
+        background: rgba(220,38,38,0.08); border: 1px solid rgba(220,38,38,0.2);
+        border-radius: 14px; padding: 1.25rem 1.5rem;
+        color: #f87171; font-weight: 600; font-size: 0.9rem;
+      }
+
+      /* Card */
+      .pokemon-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 24px; overflow: hidden;
+        animation: cardIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      @keyframes cardIn {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      .card-top {
+        padding: 2rem 2rem 1.75rem;
+        background: linear-gradient(135deg, rgba(249,115,22,0.12) 0%, rgba(139,92,246,0.08) 100%);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        position: relative; overflow: hidden;
+      }
+      .card-top::before {
+        content: '';
+        position: absolute; top: -60px; right: -60px;
+        width: 200px; height: 200px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(249,115,22,0.2) 0%, transparent 70%);
+        pointer-events: none;
+      }
+      .card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; position: relative; }
+      .card-name { font-size: 2.25rem; font-weight: 800; letter-spacing: -0.03em; color: #fff; line-height: 1; }
+      .card-category { font-size: 0.8rem; color: rgba(255,255,255,0.4); font-weight: 600; margin-top: 0.4rem; letter-spacing: 0.04em; text-transform: uppercase; }
+      .types { display: flex; gap: 0.4rem; flex-wrap: wrap; padding-top: 0.25rem; }
+      .type-badge {
+        padding: 0.35rem 1rem; border-radius: 999px; font-size: 0.75rem;
+        font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 0.06em;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      }
+
+      .card-meta-row { display: flex; gap: 1.5rem; }
+      .meta-pill {
+        background: rgba(255,255,255,0.08); border-radius: 10px;
+        padding: 0.5rem 1rem; display: flex; flex-direction: column; gap: 0.15rem;
+      }
+      .meta-pill .label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.35); font-weight: 700; }
+      .meta-pill .value { font-size: 0.9rem; font-weight: 800; color: #fff; }
+
+      .card-body { padding: 1.75rem 2rem; }
+
+      .section-label {
+        font-size: 0.68rem; font-weight: 800; text-transform: uppercase;
+        letter-spacing: 0.1em; color: rgba(255,255,255,0.25);
+        margin-bottom: 0.65rem; margin-top: 1.5rem;
+      }
+      .section-label:first-child { margin-top: 0; }
+
+      .description { font-size: 0.95rem; line-height: 1.75; color: rgba(255,255,255,0.6); }
+
+      /* Stats */
+      .stats-grid { display: flex; flex-direction: column; gap: 0.5rem; }
+      .stat-row { display: flex; align-items: center; gap: 0.75rem; }
+      .stat-label { font-size: 0.7rem; font-weight: 800; color: rgba(255,255,255,0.35); width: 64px; text-transform: uppercase; letter-spacing: 0.05em; flex-shrink: 0; }
+      .stat-bar-wrap { flex: 1; background: rgba(255,255,255,0.06); border-radius: 4px; height: 6px; overflow: hidden; }
+      .stat-bar {
+        height: 100%; border-radius: 4px; width: 0%;
+        background: linear-gradient(90deg, #f97316 0%, #fb923c 100%);
+        transition: width 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 0 8px rgba(249,115,22,0.5);
+      }
+      .stat-bar.high { background: linear-gradient(90deg, #22c55e 0%, #4ade80 100%); box-shadow: 0 0 8px rgba(34,197,94,0.5); }
+      .stat-bar.low  { background: linear-gradient(90deg, #ef4444 0%, #f87171 100%); box-shadow: 0 0 8px rgba(239,68,68,0.5); }
+      .stat-val { font-size: 0.78rem; font-weight: 800; width: 28px; text-align: right; color: rgba(255,255,255,0.7); }
+
+      .stat-total {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-top: 0.75rem; padding-top: 0.75rem;
+        border-top: 1px solid rgba(255,255,255,0.06);
+        font-size: 0.78rem; color: rgba(255,255,255,0.35); font-weight: 700;
+      }
+      .stat-total strong { color: rgba(255,255,255,0.7); font-size: 0.9rem; }
+
+      /* Badges */
+      .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+      .ability-badge {
+        background: rgba(249,115,22,0.1); border: 1px solid rgba(249,115,22,0.2);
+        color: #fb923c; padding: 0.35rem 0.85rem; border-radius: 8px;
+        font-size: 0.8rem; font-weight: 700;
+      }
+      .move-badge {
+        background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+        color: rgba(255,255,255,0.6); padding: 0.35rem 0.85rem;
+        border-radius: 8px; font-size: 0.8rem; font-weight: 700;
+        transition: all 0.15s;
+      }
+      .move-badge:hover { background: rgba(255,255,255,0.08); color: #fff; }
+
+      /* Type colors */
+      .t-normal   { background: #6d6d4e; }
+      .t-fire     { background: #9c3100; }
+      .t-water    { background: #1a48b8; }
+      .t-grass    { background: #2d7a1e; }
+      .t-electric { background: #a38400; }
+      .t-ice      { background: #2e8080; }
+      .t-fighting { background: #7d1a14; }
+      .t-poison   { background: #6a2080; }
+      .t-ground   { background: #8a6a00; }
+      .t-flying   { background: #4a3a90; }
+      .t-psychic  { background: #991050; }
+      .t-bug      { background: #4a5a00; }
+      .t-rock     { background: #6a5800; }
+      .t-ghost    { background: #3a2060; }
+      .t-dragon   { background: #3800b0; }
+      .t-dark     { background: #2a1a10; }
+      .t-steel    { background: #4a4a60; }
+      .t-fairy    { background: #8a3050; }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <span class="logo">Pokédex</span>
+      <div>
+        <a href="/">Home</a>
+        <a href="/pokedex">Pokédex</a>
+        <a href="/ai-generator">AI Generator</a>
+        <a href="/about">About</a>
+      </div>
+    </nav>
+
+    <main>
+      <div class="hero">
+        <div class="hero-tag">✦ Powered by Claude AI</div>
+        <h1>Generate a <em>new</em><br/>Pokémon</h1>
+        <p>Describe any concept — Claude will design a fully original Pokémon with stats, moves, and lore.</p>
+      </div>
+
+      <div class="form-box">
+        <label for="prompt">Your concept</label>
+        <textarea id="prompt" placeholder="e.g. A ghostly lantern spirit that haunts ancient forests at night…"></textarea>
+        <div class="examples">
+          <strong>Try one:</strong>
+          <span class="example-chip" onclick="setPrompt('a tiny robot mouse powered by static electricity')">robot mouse ⚡</span>
+          <span class="example-chip" onclick="setPrompt('a deep-sea serpent made of living bioluminescent coral')">deep-sea serpent 🌊</span>
+          <span class="example-chip" onclick="setPrompt('a samurai fox with ice powers and a frozen blade')">samurai fox 🦊</span>
+          <span class="example-chip" onclick="setPrompt('a living thundercloud that rains lightning bolts')">thundercloud ⛈️</span>
+        </div>
+        <button class="btn" id="generate-btn" onclick="generate()">✦ Generate Pokémon</button>
+      </div>
+
+      <div id="result"></div>
+    </main>
+
+    <script>
+      const TYPE_COLORS: Record<string, string> = {
+        normal: 't-normal', fire: 't-fire', water: 't-water', grass: 't-grass',
+        electric: 't-electric', ice: 't-ice', fighting: 't-fighting', poison: 't-poison',
+        ground: 't-ground', flying: 't-flying', psychic: 't-psychic', bug: 't-bug',
+        rock: 't-rock', ghost: 't-ghost', dragon: 't-dragon', dark: 't-dark',
+        steel: 't-steel', fairy: 't-fairy',
+      };
+
+      const STAT_NAMES: Record<string, string> = {
+        hp: 'HP', attack: 'ATK', defense: 'DEF',
+        sp_attack: 'Sp.Atk', sp_defense: 'Sp.Def', speed: 'Speed',
+      };
+
+      function setPrompt(text: string) {
+        (document.getElementById('prompt') as HTMLTextAreaElement).value = text;
+        (document.getElementById('prompt') as HTMLTextAreaElement).focus();
+      }
+
+      async function generate() {
+        const prompt = (document.getElementById('prompt') as HTMLTextAreaElement).value.trim();
+        if (!prompt) return;
+
+        const btn = document.getElementById('generate-btn') as HTMLButtonElement;
+        const result = document.getElementById('result')!;
+
+        btn.disabled = true;
+        btn.textContent = 'Generating…';
+        result.style.display = 'block';
+        result.innerHTML = `
+          <div class="loading-wrap">
+            <div class="spinner"></div>
+            <p>Claude is designing your Pokémon…</p>
+          </div>`;
+
+        try {
+          const res = await fetch('/api/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt }),
+          });
+          const data = await res.json();
+
+          if (!res.ok || data.error) {
+            result.innerHTML = `<div class="error-box">⚠ ${data.error ?? 'Something went wrong'}</div>`;
+            return;
+          }
+
+          result.innerHTML = renderCard(data.pokemon);
+          requestAnimationFrame(() => {
+            document.querySelectorAll('.stat-bar[data-val]').forEach(el => {
+              const bar = el as HTMLElement;
+              const val = parseInt(bar.dataset.val!);
+              bar.style.width = (val / 255 * 100) + '%';
+              if (val >= 120) bar.classList.add('high');
+              else if (val <= 50) bar.classList.add('low');
+            });
+          });
+        } catch {
+          result.innerHTML = `<div class="error-box">⚠ Network error — make sure ANTHROPIC_API_KEY is set.</div>`;
+        } finally {
+          btn.disabled = false;
+          btn.textContent = '✦ Generate Pokémon';
+        }
+      }
+
+      function renderCard(p: any): string {
+        const typeBadges = (p.types ?? []).map((t: string) => {
+          const cls = TYPE_COLORS[t.toLowerCase()] ?? 't-normal';
+          return `<span class="type-badge ${cls}">${t}</span>`;
+        }).join('');
+
+        const stats = p.stats ?? {};
+        const total = Object.values(stats).reduce((s: number, v) => s + (v as number), 0);
+        const statRows = Object.entries(STAT_NAMES).map(([key, label]) => {
+          const val = stats[key] ?? 0;
+          return `
+            <div class="stat-row">
+              <span class="stat-label">${label}</span>
+              <div class="stat-bar-wrap">
+                <div class="stat-bar" data-val="${val}" style="width:0%"></div>
+              </div>
+              <span class="stat-val">${val}</span>
+            </div>`;
+        }).join('');
+
+        const abilities = (p.abilities ?? []).map((a: string) =>
+          `<span class="ability-badge">${a}</span>`).join('');
+
+        const moves = (p.moves ?? []).map((m: string) =>
+          `<span class="move-badge">${m}</span>`).join('');
+
+        return `
+          <div class="pokemon-card">
+            <div class="card-top">
+              <div class="card-header">
+                <div>
+                  <div class="card-name">${p.name ?? 'Unknown'}</div>
+                  <div class="card-category">${p.category ?? ''}</div>
+                </div>
+                <div class="types">${typeBadges}</div>
+              </div>
+              <div class="card-meta-row">
+                <div class="meta-pill">
+                  <span class="label">Height</span>
+                  <span class="value">${p.height ?? '—'}</span>
+                </div>
+                <div class="meta-pill">
+                  <span class="label">Weight</span>
+                  <span class="value">${p.weight ?? '—'}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <p class="section-label">Pokédex Entry</p>
+              <p class="description">${p.description ?? ''}</p>
+
+              <p class="section-label">Base Stats</p>
+              <div class="stats-grid">${statRows}</div>
+              <div class="stat-total">
+                <span>Base Stat Total</span>
+                <strong>${total}</strong>
+              </div>
+
+              <p class="section-label">Abilities</p>
+              <div class="tags">${abilities}</div>
+
+              <p class="section-label">Signature Moves</p>
+              <div class="tags">${moves}</div>
+            </div>
+          </div>`;
+      }
+
+      document.getElementById('prompt')!.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) generate();
+      });
+    </script>
+  </body>
+</html>

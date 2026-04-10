@@ -25,32 +25,81 @@ const pokemon = await Promise.all(
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet" />
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font-family: 'Nunito', sans-serif; background: #ffffff; color: #1a1a1a; min-height: 100vh; }
-      nav { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 2rem; border-bottom: 1px solid rgba(0,0,0,0.08); }
-      nav a { color: #1a1a1a; text-decoration: none; margin-left: 2rem; opacity: 0.6; font-weight: 600; }
-      nav a:hover { opacity: 1; }
-      .logo { font-weight: 800; font-size: 1.25rem; color: #f97316; }
-      main { padding: 3rem 2rem; max-width: 1200px; margin: 0 auto; }
-      .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-      h1 { font-size: 2rem; font-weight: 800; }
-      .page-info { opacity: 0.4; font-size: 0.9rem; }
-      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 1rem; }
-      .card { background: #fff7ed; border: 1px solid rgba(0,0,0,0.06); border-radius: 16px; padding: 1.5rem 1rem; text-align: center; text-decoration: none; color: #1a1a1a; transition: box-shadow 0.2s, transform 0.2s; }
-      .card:hover { box-shadow: 0 8px 24px rgba(249,115,22,0.15); transform: translateY(-4px); }
-      .card img { width: 96px; height: 96px; }
-      .card .number { font-size: 0.75rem; opacity: 0.4; margin-bottom: 0.25rem; font-weight: 600; }
-      .card .name { font-weight: 700; text-transform: capitalize; }
-      .pagination { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 3rem; }
-      .btn { background: #f97316; color: white; padding: 0.6rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 700; transition: background 0.2s; }
-      .btn:hover { background: #ea6c00; }
-      .btn.disabled { opacity: 0.3; pointer-events: none; }
-      .page-count { opacity: 0.4; font-size: 0.9rem; }
+      body { font-family: 'Nunito', sans-serif; background: #0a0a0f; color: #f0f0f5; min-height: 100vh; overflow-x: hidden; }
+
+      body::before {
+        content: ''; position: fixed; border-radius: 50%;
+        filter: blur(140px); pointer-events: none; z-index: 0;
+        width: 700px; height: 700px;
+        background: radial-gradient(circle, rgba(249,115,22,0.1) 0%, transparent 70%);
+        top: -300px; right: -200px;
+      }
+
+      nav {
+        position: relative; z-index: 10;
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 1.25rem 2rem;
+        background: rgba(10,10,15,0.8); backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+      }
+      nav a { color: rgba(255,255,255,0.5); text-decoration: none; margin-left: 2rem; transition: color 0.2s; font-weight: 600; font-size: 0.9rem; }
+      nav a:hover { color: #f97316; }
+      .logo { font-weight: 800; font-size: 1.25rem; color: #f97316; letter-spacing: -0.02em; }
+
+      main { position: relative; z-index: 1; padding: 3rem 2rem; max-width: 1200px; margin: 0 auto; }
+
+      .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+      h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; }
+      .page-info { font-size: 0.85rem; color: rgba(255,255,255,0.3); font-weight: 600; }
+
       .search-bar { display: flex; gap: 0.75rem; margin-bottom: 2rem; flex-wrap: wrap; align-items: center; }
-      .search-input { flex: 1; min-width: 200px; padding: 0.65rem 1rem; border: 1.5px solid rgba(0,0,0,0.12); border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 1rem; outline: none; }
-      .search-input:focus { border-color: #f97316; }
-      .type-select { padding: 0.65rem 1rem; border: 1.5px solid rgba(0,0,0,0.12); border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 1rem; background: white; cursor: pointer; outline: none; }
-      .type-select:focus { border-color: #f97316; }
-      .search-count { opacity: 0.4; font-size: 0.9rem; white-space: nowrap; }
+      .search-input {
+        flex: 1; min-width: 200px; padding: 0.7rem 1rem;
+        border: 1px solid rgba(255,255,255,0.08); border-radius: 10px;
+        font-family: 'Nunito', sans-serif; font-size: 0.95rem;
+        background: rgba(255,255,255,0.05); color: #f0f0f5;
+        outline: none; transition: border-color 0.2s;
+      }
+      .search-input::placeholder { color: rgba(255,255,255,0.2); }
+      .search-input:focus { border-color: rgba(249,115,22,0.4); background: rgba(255,255,255,0.07); }
+
+      .type-select {
+        padding: 0.7rem 1rem; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px;
+        font-family: 'Nunito', sans-serif; font-size: 0.95rem;
+        background: rgba(255,255,255,0.05); color: #f0f0f5;
+        cursor: pointer; outline: none; transition: border-color 0.2s;
+      }
+      .type-select option { background: #1a1a2e; }
+      .type-select:focus { border-color: rgba(249,115,22,0.4); }
+
+      .search-count { font-size: 0.85rem; color: rgba(255,255,255,0.3); font-weight: 600; white-space: nowrap; }
+
+      .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 0.85rem; }
+
+      .card {
+        background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 16px; padding: 1.25rem 1rem; text-align: center;
+        text-decoration: none; color: #f0f0f5;
+        transition: border-color 0.2s, transform 0.2s, background 0.2s;
+        backdrop-filter: blur(10px);
+      }
+      .card:hover {
+        border-color: rgba(249,115,22,0.35); transform: translateY(-4px);
+        background: rgba(249,115,22,0.06);
+      }
+      .card img { width: 88px; height: 88px; image-rendering: pixelated; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5)); }
+      .card .number { font-size: 0.7rem; color: rgba(255,255,255,0.25); margin-bottom: 0.25rem; font-weight: 700; letter-spacing: 0.04em; }
+      .card .name { font-weight: 700; text-transform: capitalize; font-size: 0.9rem; }
+
+      .pagination { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 3rem; }
+      .btn {
+        background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+        color: rgba(255,255,255,0.7); padding: 0.65rem 1.5rem; border-radius: 10px;
+        text-decoration: none; font-weight: 700; font-size: 0.9rem; transition: all 0.15s;
+      }
+      .btn:hover { background: rgba(249,115,22,0.15); border-color: rgba(249,115,22,0.3); color: #f97316; }
+      .btn.disabled { opacity: 0.25; pointer-events: none; }
+      .page-count { font-size: 0.85rem; color: rgba(255,255,255,0.3); font-weight: 600; }
     </style>
   </head>
   <body>
@@ -59,11 +108,12 @@ const pokemon = await Promise.all(
       <div>
         <a href="/">Home</a>
         <a href="/pokedex">Pokédex</a>
+        <a href="/ai-generator">AI Generator</a>
         <a href="/about">About</a>
       </div>
     </nav>
     <main>
-      <div class="header">
+      <div class="top-bar">
         <h1>Pokédex</h1>
         <span class="page-info">Page {page} of {totalPages}</span>
       </div>
@@ -168,7 +218,7 @@ const pokemon = await Promise.all(
           searchResults.innerHTML = display.map(p =>
             `<a href="/pokemon/${p.name}" class="card">` +
             `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${p.id}.png" ` +
-            `alt="${p.name}" loading="lazy" width="96" height="96" />` +
+            `alt="${p.name}" loading="lazy" width="88" height="88" />` +
             `<div class="number">#${String(p.id).padStart(3, '0')}</div>` +
             `<div class="name">${p.name}</div></a>`
           ).join('');
